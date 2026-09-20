@@ -1,0 +1,15 @@
+{
+  "data_kind": "local_csv",
+  "label": "TSLA vs SPY",
+  "seed": null,
+  "window_sessions": 5,
+  "input_events": 6,
+  "included_events": 6,
+  "excluded_events": 0,
+  "method": "market_adjusted",
+  "returns_input": "data\\real\\returns.csv",
+  "events_input": "data\\real\\events.csv",
+  "pandas": "2.2.2",
+  "numpy": "1.26.4",
+  "matplotlib": "3.8.4"
+}

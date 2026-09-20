@@ -1,0 +1,97 @@
+{
+  "dataset": "TSLA versus SPY daily adjusted-close return example",
+  "requested_sample": {
+    "start_inclusive": "2023-01-01",
+    "end_exclusive": "2025-01-01"
+  },
+  "sources": [
+    {
+      "symbol": "TSLA",
+      "role": "asset",
+      "provider": "Yahoo Finance chart API",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TSLA?period1=1672531200&period2=1735689600&interval=1d",
+      "history_url": "https://finance.yahoo.com/quote/TSLA/history/",
+      "downloaded_utc": "2026-09-20T07:02:26+00:00",
+      "raw_json": "raw/TSLA_2023_2024.yahoo.json",
+      "raw_json_sha256": "dc8756e236e92e266464e563c63b589fe63a69a5d65555e6a923fbc03ad347e6",
+      "raw_json_bytes": 55656,
+      "parsed_prices_csv": "raw/TSLA_prices.csv",
+      "exchange_timezone": "America/New_York",
+      "currency": "USD",
+      "first_trading_date": "2023-01-03",
+      "last_trading_date": "2024-12-31",
+      "price_observations": 502,
+      "missing_adjusted_closes": 0
+    },
+    {
+      "symbol": "SPY",
+      "role": "market_benchmark_proxy",
+      "provider": "Yahoo Finance chart API",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=1672531200&period2=1735689600&interval=1d",
+      "history_url": "https://finance.yahoo.com/quote/SPY/history/",
+      "downloaded_utc": "2026-09-20T07:02:26+00:00",
+      "raw_json": "raw/SPY_2023_2024.yahoo.json",
+      "raw_json_sha256": "18cbf36e9004d3edcca1afa08b755838c6bd89615c28b5903b5175377797d3f1",
+      "raw_json_bytes": 55518,
+      "parsed_prices_csv": "raw/SPY_prices.csv",
+      "exchange_timezone": "America/New_York",
+      "currency": "USD",
+      "first_trading_date": "2023-01-03",
+      "last_trading_date": "2024-12-31",
+      "price_observations": 502,
+      "missing_adjusted_closes": 0
+    }
+  ],
+  "ratings": {
+    "nature": "Manually transcribed public reporting, not complete vendor rating history",
+    "source_records": "raw/ratings_source_records.csv",
+    "source_records_sha256": "45b8602def91e54608acb79616308cbf9b67e79c977bdbcb6665e1fc74d9ec0b",
+    "events_csv": "events.csv",
+    "events_csv_sha256": "9cff8c1f10422f25cd517a30be8616b5bd7efbd533e5e5ed4c11c357f7c1dfe9",
+    "event_count": 6,
+    "counts_by_event_type": {
+      "downgrade": 4,
+      "upgrade": 2
+    },
+    "source_urls": [
+      "https://www.investing.com/news/stock-market-news/4-big-analyst-cuts-tesla-slashed-at-barclays-after-too-sharp-rally-3109875",
+      "https://www.investing.com/news/stock-market-news/tesla-loses-one-of-its-biggest-street-bulls-as-morgan-stanley-cuts-rating-432SI-3110961",
+      "https://m.investing.com/news/stock-market-news/tesla-supercomputer-could-boost-ev-makers-market-cap-by-600-billion-morgan-stanley-3171337?ampMode=1",
+      "https://www.investing.com/news/stock-market-news/tesla-stock-drops-as-wells-fargo-cuts-rating-to-sell-sees-30-downside-risk-3335448",
+      "https://www.investing.com/news/stock-market-news/tesla-stock-extends-gains-to-12-as-bank-of-america-upgrades-to-buy-3392978",
+      "https://www.investing.com/news/stock-market-news/tesla-stock-extends-selloff-as-ubs-downgrades-to-sell-on-valuation-concerns-3516888"
+    ],
+    "date_policy": "Preserve reported announcement dates, including weekends. The event-study backend maps each to the next supplied trading session; unverified publication timestamps do not establish analyst-note release times.",
+    "selection_warning": "Small hand-selected illustration with incomplete coverage, overlapping windows and possible contemporaneous news confounding; not a representative causal sample."
+  },
+  "alignment": {
+    "calendar": "Exchange-local daily dates, converted from UTC Yahoo timestamps using America/New_York",
+    "matching_sessions": 502,
+    "calendars_identical": true,
+    "sessions_dropped": 0,
+    "first_trading_date": "2023-01-03",
+    "last_trading_date": "2024-12-31"
+  },
+  "transformation": {
+    "formula": "ret_t = TSLA_Adj_Close_t / TSLA_Adj_Close_(t-1) - 1; mkt_t = SPY_Adj_Close_t / SPY_Adj_Close_(t-1) - 1",
+    "units": "decimal daily returns; 0.01 means 1%",
+    "pandas_operation": "adjusted_close.pct_change(fill_method=None)",
+    "missing_data_policy": "No fill, calendar compression, or unadjusted-close fallback. Duplicate or mismatched calendars and missing adjusted closes fail validation. First-row returns remain NaN because no preceding sample price exists.",
+    "benchmark": "SPY adjusted-close return is a tradable broad US equity benchmark proxy, not a fitted market model or a market excess-return factor."
+  },
+  "output": {
+    "returns_csv": "returns.csv",
+    "returns_csv_sha256": "8d896518a832ed390644285430f49d3d1c21f391aab30e63ad7a1a1135648e2c",
+    "rows": 502,
+    "complete_return_rows": 501,
+    "rows_with_missing_return": 1,
+    "first_complete_return_date": "2023-01-04"
+  },
+  "limitations": [
+    "Yahoo adjusted prices can be revised retrospectively for corporate actions and corrections; this snapshot is not an original vendor point-in-time database.",
+    "The raw endpoint may include metadata outside the requested historical period. Returns use only the validated historical timestamp/price arrays.",
+    "Identical TSLA/SPY calendars do not independently prove exchange-calendar completeness; both sources could omit the same session.",
+    "Rating events are rebuilt from separately cited manual source records. Only prices are downloaded by this script."
+  ],
+  "reproduce": "python prepare_real_example.py (offline); python prepare_real_example.py --download (explicit network refresh)"
+}

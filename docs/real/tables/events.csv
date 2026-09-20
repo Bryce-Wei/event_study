@@ -1,0 +1,7 @@
+event_id,firm,event_type,event_date,effective_event_date,event_shift_days,car
+1,Barclays,downgrade,2023-06-21,2023-06-21,0,0.022742760399056598
+2,Morgan Stanley,downgrade,2023-06-22,2023-06-22,0,-0.005232652261544097
+3,Morgan Stanley,upgrade,2023-09-10,2023-09-11,1,0.04732761405909628
+4,Wells Fargo,downgrade,2024-03-13,2024-03-13,0,-0.0528693064957495
+5,Bank of America,upgrade,2024-04-24,2024-04-24,0,0.1639768991676983
+6,UBS,downgrade,2024-07-12,2024-07-12,0,-0.018681116512832906

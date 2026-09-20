@@ -1,0 +1,15 @@
+{
+  "data_kind": "synthetic",
+  "label": "Synthetic sample",
+  "seed": 42,
+  "window_sessions": 5,
+  "input_events": 32,
+  "included_events": 32,
+  "excluded_events": 0,
+  "method": "market_adjusted",
+  "returns_input": null,
+  "events_input": null,
+  "pandas": "2.2.2",
+  "numpy": "1.26.4",
+  "matplotlib": "3.8.4"
+}

@@ -1,0 +1,16 @@
+{
+  "TSLA": {
+    "url": "https://query1.finance.yahoo.com/v8/finance/chart/TSLA?period1=1672531200&period2=1735689600&interval=1d",
+    "downloaded_utc": "2026-09-20T07:02:26+00:00",
+    "sha256": "dc8756e236e92e266464e563c63b589fe63a69a5d65555e6a923fbc03ad347e6",
+    "bytes": 55656,
+    "raw_json": "TSLA_2023_2024.yahoo.json"
+  },
+  "SPY": {
+    "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?period1=1672531200&period2=1735689600&interval=1d",
+    "downloaded_utc": "2026-09-20T07:02:26+00:00",
+    "sha256": "18cbf36e9004d3edcca1afa08b755838c6bd89615c28b5903b5175377797d3f1",
+    "bytes": 55518,
+    "raw_json": "SPY_2023_2024.yahoo.json"
+  }
+}

@@ -1,0 +1,7 @@
+event_id,event_date,firm,event_type
+1,2023-06-21,Barclays,downgrade
+2,2023-06-22,Morgan Stanley,downgrade
+3,2023-09-10,Morgan Stanley,upgrade
+4,2024-03-13,Wells Fargo,downgrade
+5,2024-04-24,Bank of America,upgrade
+6,2024-07-12,UBS,downgrade
