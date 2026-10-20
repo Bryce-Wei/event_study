@@ -180,8 +180,6 @@ python visualize.py --returns data/local/returns.csv --events data/local/events.
 
 上述命令改用 [-3,+3] 个交易日窗口。输出包括逐日事件面板、逐事件 CAR、AAR/CAAR、分组统计、排除原因，以及 5 张单图和 1 张总览。
 
-如果从原项目的 `mk_rets.mk_ret_df()`、`mk_events.mk_event_df()` 取得 DataFrame，可以把索引分别以 `Date`、`event_id` 名称写入 CSV 后接入新入口；但须先检查原数据的收盘价调整口径、市场收益单位和交易日期完整性。
-
 ## 模拟案例
 
 ```bash
@@ -211,13 +209,7 @@ event_study/
 ├── docs/
 │   ├── real/                  # 真实案例图、结果表和运行元数据
 │   └── demo/                  # 模拟案例图与结果
-├── tests/test_event_analysis.py
-├── Main.py                    # 以下为保留的历史课程流程
-├── mk_rets.py
-├── mk_events.py
-├── mk_cars.py
-├── test_hypo.py
-└── important.md
+└── tests/test_event_analysis.py
 ```
 
 ## 后续研究方向
