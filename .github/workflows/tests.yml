@@ -1,0 +1,107 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} (${{ matrix.deps }} deps)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # README: Python 3.10 or newer; requirements-viz.txt resolves to the newest allowed releases.
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        deps: [latest]
+        include:
+          # Versions the README records for the committed figures and tables.
+          - python-version: "3.12"
+            deps: documented
+            pins: numpy==1.26.4 pandas==2.2.2 matplotlib==3.8.4 scipy==1.13.1
+    defaults:
+      run:
+        shell: bash
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements-viz.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-viz.txt ${{ matrix.pins }}
+          python -c "import numpy, pandas, scipy, matplotlib; print('numpy', numpy.__version__, '| pandas', pandas.__version__, '| scipy', scipy.__version__, '| matplotlib', matplotlib.__version__)"
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Rebuild real-case inputs from raw snapshots (offline)
+        run: |
+          cp -R data/real "$RUNNER_TEMP/data-real"
+          # Delete the generated files from the copy, so the checks below only pass if the script writes them again.
+          (cd "$RUNNER_TEMP/data-real" && rm returns.csv events.csv source_manifest.json raw/TSLA_prices.csv raw/SPY_prices.csv)
+          python prepare_real_example.py --data-dir "$RUNNER_TEMP/data-real"
+          for f in returns.csv events.csv raw/TSLA_prices.csv raw/SPY_prices.csv; do
+            diff --strip-trailing-cr "data/real/$f" "$RUNNER_TEMP/data-real/$f"
+          done
+          python - "$RUNNER_TEMP/data-real" <<'PY'
+          import hashlib, json, sys
+          from pathlib import Path
+
+          committed = json.loads(Path("data/real/source_manifest.json").read_text(encoding="utf-8"))
+          rebuilt = json.loads(Path(sys.argv[1], "source_manifest.json").read_text(encoding="utf-8"))
+          # These hashes cover CSV bytes: the committed files use CRLF, the rebuilt ones LF.
+          for section, key, name in [("ratings", "events_csv_sha256", "events.csv"),
+                                     ("output", "returns_csv_sha256", "returns.csv")]:
+              data = Path("data/real", name).read_bytes()
+              assert committed[section].pop(key) == hashlib.sha256(data).hexdigest(), name
+              assert rebuilt[section].pop(key) == hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest(), name
+          assert committed == rebuilt, "source_manifest.json differs beyond line-ending hashes"
+          print("source_manifest.json matches")
+          PY
+
+      - name: Regenerate real case and synthetic demo
+        run: |
+          python visualize.py --returns data/real/returns.csv --events data/real/events.csv --label "TSLA vs SPY" --output-dir "$RUNNER_TEMP/real"
+          python visualize.py --demo --seed 42 --output-dir "$RUNNER_TEMP/demo"
+
+      - name: Compare tables with committed results (exact text)
+        if: matrix.deps == 'documented'
+        run: |
+          diff -r --strip-trailing-cr docs/real/tables "$RUNNER_TEMP/real/tables"
+          diff -r --strip-trailing-cr docs/demo/tables "$RUNNER_TEMP/demo/tables"
+          diff -r --strip-trailing-cr docs/demo/inputs "$RUNNER_TEMP/demo/inputs"
+
+      - name: Compare tables with committed results (numeric tolerance)
+        # SciPy 1.17+ returns t quantiles that differ by about 1e-11 (relative), so newer stacks are compared numerically.
+        run: |
+          python - "$RUNNER_TEMP" <<'PY'
+          import sys
+          from pathlib import Path
+
+          import pandas as pd
+          from pandas.testing import assert_frame_equal
+
+          out = Path(sys.argv[1])
+          for committed_dir, rebuilt_dir in [(Path("docs/real/tables"), out / "real/tables"),
+                                             (Path("docs/demo/tables"), out / "demo/tables"),
+                                             (Path("docs/demo/inputs"), out / "demo/inputs")]:
+              names = sorted(p.name for p in committed_dir.glob("*.csv"))
+              assert names == sorted(p.name for p in rebuilt_dir.glob("*.csv")), committed_dir
+              for name in names:
+                  assert_frame_equal(pd.read_csv(rebuilt_dir / name), pd.read_csv(committed_dir / name),
+                                     check_exact=False, rtol=1e-8, atol=1e-12)
+                  print("matches", committed_dir / name)
+          PY
